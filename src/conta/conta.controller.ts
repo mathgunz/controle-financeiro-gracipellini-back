@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ContaService } from './conta.service';
-import { CreateContaDto } from './dto/create-conta.dto';
-import { UpdateContaDto } from './dto/update-conta.dto';
+import { CreateContaDto } from '../dto/create-conta.dto';
+import { UpdateContaDto } from '../dto/update-conta.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Contas')

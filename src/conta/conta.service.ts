@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContaDto } from './dto/create-conta.dto';
-import { UpdateContaDto } from './dto/update-conta.dto';
+import { CreateContaDto } from '../dto/create-conta.dto';
+import { UpdateContaDto } from '../dto/update-conta.dto';
 
 @Injectable()
 export class ContaService {

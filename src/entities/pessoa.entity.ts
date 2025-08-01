@@ -1,1 +1,8 @@
-export class Pessoa {}
+export class Pessoa {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  email: string;
+  senha: string;
+  ativo: boolean;
+}

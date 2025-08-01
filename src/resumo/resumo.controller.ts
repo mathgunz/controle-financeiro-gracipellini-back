@@ -1,34 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ResumoService } from './resumo.service';
-import { CreateResumoDto } from '../dto/create-resumo.dto';
-import { UpdateResumoDto } from '../dto/update-resumo.dto';
+import { Resumo } from 'src/dto/resumo.dto';
 
 @Controller('resumo')
 export class ResumoController {
   constructor(private readonly resumoService: ResumoService) {}
 
-  @Post()
-  create(@Body() createResumoDto: CreateResumoDto) {
-    return this.resumoService.create(createResumoDto);
-  }
+ @Get()
+  findAll(): Resumo[] {
+    const resumo: Resumo = {
+      receita: {
+        totalRecebida: 100,
+        totalReceber: 200,
+        totalEmily: 300,
+        totalMatheus: 400,
+      },
+      despesa: {
+        totalPagar: 100,
+        totalPaga: 200,
+        totalPagoEmily: 300,
+        totalPagoMatheus: 400,
+      },
+      saldo: {
+        total: 100,
+        atual: 300,
+      }
+    };
 
-  @Get()
-  findAll() {
-    return this.resumoService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.resumoService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResumoDto: UpdateResumoDto) {
-    return this.resumoService.update(+id, updateResumoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.resumoService.remove(+id);
+    return [resumo];
   }
 }

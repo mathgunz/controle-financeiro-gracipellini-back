@@ -1,34 +1,60 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { PessoaService } from './pessoa.service';
 import { CreatePessoaDto } from '../dto/create-pessoa.dto';
 import { UpdatePessoaDto } from '../dto/update-pessoa.dto';
+import { Pessoa } from 'src/entities/pessoa.entity';
 
 @Controller('pessoa')
 export class PessoaController {
   constructor(private readonly pessoaService: PessoaService) {}
 
-  @Post()
-  create(@Body() createPessoaDto: CreatePessoaDto) {
-    return this.pessoaService.create(createPessoaDto);
-  }
+ private pessoas: Pessoa[] = [
+    {
+      id: 1,
+      nome: 'Matheus',
+      sobrenome: 'Graciano',
+      email: 'math@gmail.com',
+      senha: 'abcx',
+      ativo: true
+    }
+  ];
 
   @Get()
-  findAll() {
-    return this.pessoaService.findAll();
+  findAll(): Pessoa[] {
+    return this.pessoas;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pessoaService.findOne(+id);
+  findOne(@Param('id') id: string): Pessoa | { message: string } {
+    const pessoa = this.pessoas.find(p => p.id === Number(id));
+    return pessoa || { message: 'Pessoa não encontrada' };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePessoaDto: UpdatePessoaDto) {
-    return this.pessoaService.update(+id, updatePessoaDto);
+  @Post()
+  create(@Body() dto: CreatePessoaDto): Pessoa {
+    const nova: Pessoa = {
+      id: Date.now(),
+      ...dto
+    };
+    this.pessoas.push(nova);
+    return nova;
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdatePessoaDto): Pessoa | { message: string } {
+    const index = this.pessoas.findIndex(p => p.id === Number(id));
+    if (index === -1) return { message: 'Pessoa não encontrada' };
+
+    this.pessoas[index] = { ...this.pessoas[index], ...dto };
+    return this.pessoas[index];
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pessoaService.remove(+id);
+  remove(@Param('id') id: string): { message: string } {
+    const index = this.pessoas.findIndex(p => p.id === Number(id));
+    if (index === -1) return { message: 'Pessoa não encontrada' };
+
+    this.pessoas.splice(index, 1);
+    return { message: 'Pessoa removida com sucesso' };
   }
 }
