@@ -1,8 +1,7 @@
 export class ReceitaResumo {
   totalRecebida: number;
   totalReceber: number;
-  totalEmily: number;
-  totalMatheus: number;
+  membrosTotal: MembroTotal[];
 }
 
 export class DespesaResumo {
@@ -21,4 +20,10 @@ export class Resumo {
   receita: ReceitaResumo;
   despesa: DespesaResumo;
   saldo: SaldoResumo;
+}
+
+
+export class MembroTotal {
+  nome: string;
+  total: number;
 }

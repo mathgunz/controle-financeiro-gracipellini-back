@@ -7,13 +7,18 @@ export class ResumoController {
   constructor(private readonly resumoService: ResumoService) {}
 
  @Get()
-  findAll(): Resumo[] {
+  public findAll(): Resumo[] {
     const resumo: Resumo = {
       receita: {
         totalRecebida: 100,
         totalReceber: 200,
-        totalEmily: 300,
-        totalMatheus: 400,
+        membrosTotal : [{
+          nome: 'Emily',
+          total: 100
+        }, {
+          nome: 'Matheus',
+          total: 300
+        }],
       },
       despesa: {
         totalPagar: 100,

@@ -10,7 +10,6 @@ async function bootstrap() {
     .setTitle('API Minhas Contas')
     .setDescription('Documentação da API com dados mockados')
     .setVersion('1.0')
-    .addTag('Contas')
     .build();
 
     const document = SwaggerModule.createDocument(app, config);
