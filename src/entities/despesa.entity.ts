@@ -1,4 +1,5 @@
-import { Pessoa } from "./pessoa.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Pessoa } from './pessoa.entity';
 
 export enum TipoDespesa {
   RECEITA = 'RECEITA',
@@ -17,17 +18,41 @@ export enum Categoria {
   PESSOAL = 'PESSOAL',
 }
 
+@Entity()
 export class Despesa {
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'enum', enum: TipoDespesa })
   tipo: TipoDespesa;
+
+  @Column()
   nome: string;
+
+  @Column('decimal')
   valor: number;
-  data: string; // ISO 8601 ou dd/MM/yyyy (dependendo do front)
+
+  @Column()
+  data: string;
+
+  @Column({ type: 'enum', enum: TipoPagamento })
   tipoPagamento: TipoPagamento;
+
+  @Column({ type: 'enum', enum: Categoria })
   categoria: Categoria;
+
+  @Column()
   titular: string;
+
+  @Column()
   contaPaga: boolean;
+
+  @Column()
   quantidadeMes: number;
+
+  @ManyToOne(() => Pessoa)
   pessoa: Pessoa;
-  dataPagamento: string; // ISO 8601 ou dd/MM/yyyy (dependendo do
+
+  @Column()
+  dataPagamento: string;
 }

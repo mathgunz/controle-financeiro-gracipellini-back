@@ -3,6 +3,7 @@ import { DespesaService } from './despesa.service';
 import { CreateDespesaDto, TipoDespesa } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Categoria, Despesa, TipoPagamento } from 'src/entities/despesa.entity';
+import { Pessoa } from 'src/entities/pessoa.entity';
 
 @Controller('despesa')
 export class DespesaController {
@@ -20,6 +21,8 @@ export class DespesaController {
       titular: 'Emily',
       contaPaga: true,
       quantidadeMes: 5,
+      pessoa: new Pessoa(),
+      dataPagamento: '16/08/1992',
     }
   ];
 
@@ -36,7 +39,7 @@ export class DespesaController {
   @Post()
   create(@Body() createDespesaDto: CreateDespesaDto) {
     const nova = { id: Date.now(), ...createDespesaDto };
-    this.despesas.push(nova);
+    // this.despesas.push(nova);
     return nova;
   }
 

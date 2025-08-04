@@ -3,6 +3,7 @@ import { ReceitaService } from './receita.service';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
 import { Receita } from 'src/entities/receita.entity';
+import { Pessoa } from 'src/entities/pessoa.entity';
 
 @Controller('receita')
 export class ReceitaController {
@@ -16,7 +17,8 @@ export class ReceitaController {
       data: '16/08/1992',
       categoria: 'CASA',
       titular: 'Emily',
-      quantidadeMes: 5
+      quantidadeMes: 5,
+      pessoa: new Pessoa(),
     }
   ];
 
@@ -35,7 +37,8 @@ export class ReceitaController {
   create(@Body() dto: CreateReceitaDto): Receita {
     const nova: Receita = {
       id: Date.now(),
-      ...dto
+      ...dto,
+      pessoa: new Pessoa
     };
     this.receitas.push(nova);
     return nova;
