@@ -1,3 +1,5 @@
+import { Pessoa } from "./pessoa.entity";
+
 export class Receita {
   id: number;
   nome: string;
@@ -6,4 +8,5 @@ export class Receita {
   categoria: 'CASA' | 'PESSOAL';
   titular: string;
   quantidadeMes: number;
+  pessoa: Pessoa;
 }

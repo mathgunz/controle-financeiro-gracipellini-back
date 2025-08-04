@@ -1,3 +1,5 @@
+import { Pessoa } from "./pessoa.entity";
+
 export enum TipoDespesa {
   RECEITA = 'RECEITA',
   DESPESA = 'DESPESA',
@@ -26,4 +28,6 @@ export class Despesa {
   titular: string;
   contaPaga: boolean;
   quantidadeMes: number;
+  pessoa: Pessoa;
+  dataPagamento: string; // ISO 8601 ou dd/MM/yyyy (dependendo do
 }
