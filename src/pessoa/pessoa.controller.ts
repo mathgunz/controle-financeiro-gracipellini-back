@@ -8,7 +8,7 @@ import { Pessoa } from 'src/entities/pessoa.entity';
 export class PessoaController {
   constructor(private readonly pessoaService: PessoaService) {}
 
- private pessoas: Pessoa[] = [
+  private pessoas: Pessoa[] = [
     {
       id: 1,
       nome: 'Matheus',
@@ -31,13 +31,8 @@ export class PessoaController {
   }
 
   @Post()
-  create(@Body() dto: CreatePessoaDto): Pessoa {
-    const nova: Pessoa = {
-      id: Date.now(),
-      ...dto
-    };
-    this.pessoas.push(nova);
-    return nova;
+  async create(@Body() dto: CreatePessoaDto): Promise<Pessoa> {
+    return await this.pessoaService.create(dto);
   }
 
   @Put(':id')
