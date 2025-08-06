@@ -1,0 +1,23 @@
+[
+  {
+    "nome": "Ana",
+    "sobrenome": "Pereira",
+    "email": "ana.pereira@email.com",
+    "senha": "senhaAna123",
+    "ativo": true
+  },
+  {
+    "nome": "Carlos",
+    "sobrenome": "Oliveira",
+    "email": "carlos.oliveira@email.com",
+    "senha": "senhaCarlos456",
+    "ativo": false
+  },
+  {
+    "nome": "Beatriz",
+    "sobrenome": "Souza",
+    "email": "beatriz.souza@email.com",
+    "senha": "senhaBeatriz789",
+    "ativo": true
+  }
+]

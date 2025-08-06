@@ -8,26 +8,14 @@ import { Pessoa } from 'src/entities/pessoa.entity';
 export class PessoaController {
   constructor(private readonly pessoaService: PessoaService) {}
 
-  private pessoas: Pessoa[] = [
-    {
-      id: 1,
-      nome: 'Matheus',
-      sobrenome: 'Graciano',
-      email: 'math@gmail.com',
-      senha: 'abcx',
-      ativo: true
-    }
-  ];
-
   @Get()
-  findAll(): Pessoa[] {
-    return this.pessoas;
+  async findAll(): Promise<Pessoa[]> {
+    return await this.pessoaService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Pessoa | { message: string } {
-    const pessoa = this.pessoas.find(p => p.id === Number(id));
-    return pessoa || { message: 'Pessoa não encontrada' };
+  async findOne(@Param('id') id: string): Promise<Pessoa> {
+    return await this.pessoaService.findOne(Number(id));
   }
 
   @Post()
@@ -36,20 +24,13 @@ export class PessoaController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePessoaDto): Pessoa | { message: string } {
-    const index = this.pessoas.findIndex(p => p.id === Number(id));
-    if (index === -1) return { message: 'Pessoa não encontrada' };
-
-    this.pessoas[index] = { ...this.pessoas[index], ...dto };
-    return this.pessoas[index];
+  async update(@Param('id') id: string, @Body() dto: UpdatePessoaDto): Promise<Pessoa> {
+    return await this.pessoaService.update(Number(id), dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): { message: string } {
-    const index = this.pessoas.findIndex(p => p.id === Number(id));
-    if (index === -1) return { message: 'Pessoa não encontrada' };
-
-    this.pessoas.splice(index, 1);
+  async remove(@Param('id') id: string): Promise<{ message: string }> {
+    await this.pessoaService.remove(Number(id));
     return { message: 'Pessoa removida com sucesso' };
   }
 }

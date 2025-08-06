@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePessoaDto } from '../dto/create-pessoa.dto';
@@ -17,19 +17,28 @@ export class PessoaService {
     return await this.pessoaRepository.save(pessoa);
   }
 
-  findAll() {
-    return `This action returns all pessoa`;
+  async findAll(): Promise<Pessoa[]> {
+    return await this.pessoaRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pessoa`;
+  async findOne(id: number): Promise<Pessoa> {
+    const pessoa = await this.pessoaRepository.findOneBy({ id });
+    if (!pessoa) throw new NotFoundException('Pessoa não encontrada');
+    return pessoa;
   }
 
-  update(id: number, updatePessoaDto: UpdatePessoaDto) {
-    return `This action updates a #${id} pessoa`;
+  async update(id: number, updatePessoaDto: UpdatePessoaDto): Promise<Pessoa> {
+    const pessoa = await this.pessoaRepository.preload({
+      id,
+      ...updatePessoaDto,
+    });
+    if (!pessoa) throw new NotFoundException('Pessoa não encontrada');
+    return await this.pessoaRepository.save(pessoa);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pessoa`;
+  async remove(id: number): Promise<void> {
+    const pessoa = await this.pessoaRepository.findOneBy({ id });
+    if (!pessoa) throw new NotFoundException('Pessoa não encontrada');
+    await this.pessoaRepository.remove(pessoa);
   }
 }
