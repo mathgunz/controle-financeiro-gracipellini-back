@@ -1,0 +1,41 @@
+[
+  {
+    "tipo": "DESPESA",
+    "nome": "Aluguel",
+    "valor": 1200,
+    "data": "2024-06-01",
+    "tipoPagamento": "FIXA",
+    "categoria": "CASA",
+    "titular": "João",
+    "contaPaga": true,
+    "quantidadeMes": 1,
+    "pessoa": 1,
+    "dataPagamento": "2024-06-05"
+  },
+  {
+    "tipo": "DESPESA",
+    "nome": "Supermercado",
+    "valor": 450,
+    "data": "2024-06-02",
+    "tipoPagamento": "VARIAVEL",
+    "categoria": "ALIMENTACAO",
+    "titular": "Ana",
+    "contaPaga": false,
+    "quantidadeMes": 1,
+    "pessoa": 2,
+    "dataPagamento": null
+  },
+  {
+    "tipo": "DESPESA",
+    "nome": "Internet",
+    "valor": 100,
+    "data": "2024-06-03",
+    "tipoPagamento": "FIXA",
+    "categoria": "CASA",
+    "titular": "Carlos",
+    "contaPaga": true,
+    "quantidadeMes": 1,
+    "pessoa": 3,
+    "dataPagamento": "2024-06-03"
+  }
+]

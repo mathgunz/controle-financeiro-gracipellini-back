@@ -1,64 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { ReceitaService } from './receita.service';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
-import { Receita } from 'src/entities/receita.entity';
-import { Pessoa } from 'src/entities/pessoa.entity';
 
 @Controller('receita')
 export class ReceitaController {
-  constructor(private readonly receitaService: ReceitaService) { }
-
-  private receitas: Receita[] = [
-    {
-      id: 1,
-      nome: 'Banho Pets',
-      valor: 300,
-      data: '16/08/1992',
-      categoria: 'CASA',
-      titular: 'Emily',
-      quantidadeMes: 5,
-      pessoa: new Pessoa(),
-    }
-  ];
+  constructor(private readonly receitaService: ReceitaService) {}
 
   @Get()
-  findAll(): Receita[] {
-    return this.receitas;
+  findAll() {
+    return this.receitaService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Receita | { message: string } {
-    const receita = this.receitas.find(r => r.id === Number(id));
-    return receita || { message: 'Receita não encontrada' };
+  findOne(@Param('id') id: string) {
+    return this.receitaService.findOne(Number(id));
   }
 
   @Post()
-  create(@Body() dto: CreateReceitaDto): Receita {
-    const nova: Receita = {
-      id: Date.now(),
-      ...dto,
-      pessoa: new Pessoa
-    };
-    this.receitas.push(nova);
-    return nova;
+  create(@Body() dto: CreateReceitaDto) {
+    return this.receitaService.create(dto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateReceitaDto): Receita | { message: string } {
-    const index = this.receitas.findIndex(r => r.id === Number(id));
-    if (index === -1) return { message: 'Receita não encontrada' };
-
-    this.receitas[index] = { ...this.receitas[index], ...dto };
-    return this.receitas[index];
+  update(@Param('id') id: string, @Body() dto: UpdateReceitaDto) {
+    return this.receitaService.update(Number(id), dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): { message: string } {
-    const index = this.receitas.findIndex(r => r.id === Number(id));
-    if (index === -1) return { message: 'Receita não encontrada' };
-
-    this.receitas.splice(index, 1);
-    return { message: 'Receita removida com sucesso' };
+  remove(@Param('id') id: string) {
+    return this.receitaService.remove(Number(id));
   }
 }
