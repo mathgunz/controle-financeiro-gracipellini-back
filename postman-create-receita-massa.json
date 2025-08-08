@@ -1,0 +1,26 @@
+[
+  {
+    "descricao": "Salário Mensal",
+    "valor": 3500.00,
+    "data": "2025-08-01",
+    "categoria": "Salário"
+  },
+  {
+    "descricao": "Freelance Desenvolvimento",
+    "valor": 1200.50,
+    "data": "2025-08-05",
+    "categoria": "Freelance"
+  },
+  {
+    "descricao": "Venda de Produto",
+    "valor": 450.00,
+    "data": "2025-08-10",
+    "categoria": "Venda"
+  },
+  {
+    "descricao": "Aluguel Recebido",
+    "valor": 800.00,
+    "data": "2025-08-03",
+    "categoria": "Aluguel"
+  }
+]
