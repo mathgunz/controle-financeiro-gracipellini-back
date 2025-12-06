@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Pessoa } from './entities/pessoa.entity';
 import { Receita } from './entities/receita.entity';
 import { Despesa } from './entities/despesa.entity';
+import { Grupo } from './entities/grupo.entity';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { Despesa } from './entities/despesa.entity';
       database: process.env.DB_NAME || 'controle_financeiro',
       // autoLoadEntities: true,
       synchronize: true, // use false em produção!
-      entities: [Pessoa, Receita, Despesa]
+      entities: [Pessoa, Receita, Despesa, Grupo]
     }),],
   controllers: [AppController],
   providers: [AppService],

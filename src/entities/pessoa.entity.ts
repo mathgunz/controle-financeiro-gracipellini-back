@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Grupo } from './grupo.entity';
 
 @Entity()
 export class Pessoa {
@@ -19,4 +20,8 @@ export class Pessoa {
 
   @Column({ default: true })
   ativo: boolean;
+
+  // Uma pessoa pertence a um grupo
+  @ManyToOne(() => Grupo, (grupo) => grupo.pessoas, { nullable: true, onDelete: 'SET NULL' })
+  grupo?: Grupo;
 }
