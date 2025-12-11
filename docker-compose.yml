@@ -35,6 +35,7 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-postgres}
       DB_NAME: ${DB_NAME:-controle_financeiro}
+      DB_SCHEMA: ${DB_SCHEMA:-controle_financeiro}
     networks:
       - app-network
 

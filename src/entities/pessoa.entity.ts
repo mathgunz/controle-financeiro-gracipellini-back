@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Grupo } from './grupo.entity';
 
-@Entity()
+@Entity({ name: 'pessoa', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Pessoa {
   @PrimaryGeneratedColumn()
   id: number;

@@ -18,7 +18,7 @@ export enum Categoria {
   PESSOAL = 'PESSOAL',
 }
 
-@Entity()
+@Entity({ name: 'despesa', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Despesa {
   @PrimaryGeneratedColumn()
   id: number;

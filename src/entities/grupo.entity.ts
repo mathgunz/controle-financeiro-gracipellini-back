@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Pessoa } from './pessoa.entity';
 
-@Entity('grupo')
+@Entity({ name: 'grupo', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Grupo {
   @PrimaryGeneratedColumn()
   id: number;
