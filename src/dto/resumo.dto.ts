@@ -1,28 +1,28 @@
-export class ReceitaResumo {
+export class ReceitaResumoDTO {
   totalRecebida: number;
   totalReceber: number;
-  membrosTotal: MembroTotal[];
+  membrosTotal: MembroTotalDTO[];
 }
 
 export class DespesaResumo {
   totalPagar: number;
   totalPaga: number;
-  membrosTotal: MembroTotal[];
+  membrosTotal: MembroTotalDTO[];
 }
 
-export class SaldoResumo {
-  total: number;
-  atual: number;
+export class SaldoResumoDTO {
+  saldoMesAtual: number;
+  saldoAtual: number;
 }
 
 export class Resumo {
-  receita: ReceitaResumo;
+  receita: ReceitaResumoDTO;
   despesa: DespesaResumo;
-  saldo: SaldoResumo;
+  saldo: SaldoResumoDTO;
 }
 
 
-export class MembroTotal {
+export class MembroTotalDTO {
   nome: string;
   total: number;
 }

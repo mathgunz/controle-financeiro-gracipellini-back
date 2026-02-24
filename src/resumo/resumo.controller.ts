@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ResumoService } from './resumo.service';
 import { Resumo } from 'src/dto/resumo.dto';
 
@@ -7,7 +7,7 @@ export class ResumoController {
   constructor(private readonly resumoService: ResumoService) {}
 
   @Get()
-  public async findAll(): Promise<Resumo[]> {
-    return await this.resumoService.findAll();
+  public async findAll(@Query('data') data?: string): Promise<Resumo[]> {
+    return await this.resumoService.findAll(data ? { date: data } : undefined);
   }
 }

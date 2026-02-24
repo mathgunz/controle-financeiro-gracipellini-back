@@ -32,8 +32,8 @@ export class Despesa {
   @Column('decimal')
   valor: number;
 
-  @Column()
-  data: string;
+  @Column({ type: 'date' })
+  data: Date;
 
   @Column({ type: 'enum', enum: TipoPagamento })
   tipoPagamento: TipoPagamento;

@@ -30,12 +30,7 @@ import { Grupo } from './entities/grupo.entity';
       // autoLoadEntities: true,
       synchronize: true, // use false em produção!
       entities: [Pessoa, Receita, Despesa, Grupo],
-      ssl: {
-        rejectUnauthorized: false, // para DEV, ignora validação do certificado
-      },
-      extra: {
-        sslmode: 'require',
-      },
+      ssl: false, // SSL disabled for local development
     }),],
   controllers: [AppController],
   providers: [AppService],

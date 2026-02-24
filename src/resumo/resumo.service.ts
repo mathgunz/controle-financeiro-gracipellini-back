@@ -10,29 +10,33 @@ export class ResumoService {
     private readonly receitaService: ReceitaService,
   ) {}
 
-  async findAll(): Promise<Resumo[]> {
-    // Busca todas as despesas usando o service
-    const despesas = await this.despesaService.findAll();
-    // Busca todas as receitas usando o service
-    const receitas = await this.receitaService.findAll();
+  async findAll(queryParams?: { date?: string | Date }): Promise<Resumo[]> {
+
+    const toDecimal = (n: number | string) => {
+      const num = typeof n === 'string' ? parseFloat(n) : n;
+      return Number(num.toFixed(2));
+    };
+    // Busca todas as despesas usando o service (podendo filtrar por data)
+    const despesas = await this.despesaService.findAll(queryParams);
+    // Busca todas as receitas usando o service (podendo filtrar por data)
+    const receitas = await this.receitaService.findAll(queryParams);
 
     // Calcula os campos do resumo a partir das despesas
-    const totalPagar = despesas.filter((d) => !d.contaPaga).reduce((sum, d) => sum + d.valor, 0);
-    const totalPaga = despesas.filter((d) => d.contaPaga).reduce((sum, d) => sum + d.valor, 0);
+    const totalPagar = toDecimal(despesas.filter((d) => !d.contaPaga).reduce((sum, d) => sum + d.valor, 0));
+    const totalPaga =  toDecimal(despesas.filter((d) => d.contaPaga).reduce((sum, d) => sum + d.valor, 0));
 
     // Soma o valor total das receitas
-    const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
-
-    // Soma o valor total das despesas
-    const totalDespesas = despesas.reduce((sum, d) => sum + d.valor, 0);
+    const totalReceitas = toDecimal(receitas.reduce((sum, r) => sum + toDecimal(r.valor), 0));
+    const totalDespesas = toDecimal(despesas.reduce((sum, d) => sum + toDecimal(d.valor), 0));
 
     // Saldo total e atual
-    const saldoTotal = totalReceitas;
-    const saldoAtual = totalReceitas - totalDespesas;
+    const saldoMesAtual = totalReceitas - totalDespesas;
 
     // Calcula receitas recebidas e a receber
-    const totalRecebida = receitas.reduce((sum, r) => sum + r.valor, 0);
-    const totalReceber = receitas.reduce((sum, r) => sum + r.valor, 0);
+    const totalRecebida = toDecimal(receitas.filter((r) => r.recebida).reduce((sum, r) => sum + r.valor, 0));
+    const totalReceber = toDecimal(receitas.filter((r) => !r.recebida).reduce((sum, r) => sum + r.valor, 0));
+
+    const saldoAtual = totalRecebida - totalPaga;
 
     const resumo: Resumo = {
       receita: {
@@ -64,8 +68,8 @@ export class ResumoService {
         ]
       },
       saldo: {
-        total: saldoTotal,
-        atual: saldoAtual,
+        saldoMesAtual: saldoMesAtual,
+        saldoAtual: saldoAtual,
       },
     };
 

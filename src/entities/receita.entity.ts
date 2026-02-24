@@ -12,14 +12,18 @@ export class Receita {
   @Column('decimal')
   valor: number;
 
-  @Column()
-  data: string; // ou Date
+
+  @Column({ type: 'date' })
+  data: Date; // ou Date
 
   @Column()
   categoria: 'CASA' | 'PESSOAL';
 
   @Column()
   titular: string;
+
+  @Column({ default: false })
+  recebida: boolean;
 
   @Column()
   quantidadeMes: number;

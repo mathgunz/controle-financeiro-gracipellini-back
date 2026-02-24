@@ -19,7 +19,7 @@ export class CreateDespesaDto {
   tipo: TipoDespesa;
   nome: string;
   valor: number;
-  data: string; // ISO 8601 ou dd/MM/yyyy (dependendo do front)
+  data: Date; // ISO 8601 ou dd/MM/yyyy (dependendo do front)
   tipoPagamento: TipoPagamento;
   categoria: Categoria;
   titular: string;

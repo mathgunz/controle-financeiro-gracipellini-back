@@ -17,7 +17,29 @@ export class DespesaService {
     return await this.despesaRepository.save(despesa);
   }
 
-  async findAll(): Promise<Despesa[]> {
+  async findAll(query?: { date?: string | Date }): Promise<Despesa[]> {
+    if (query?.date) {
+          let d: Date;
+    
+      if (typeof query.date === 'string') {
+        // Parse manual para garantir yyyy-mm-dd
+        const [year, month, day] = query.date.split('-').map(Number);
+        d = new Date(year, month - 1, day);
+      } else {
+        d = new Date(query.date);
+      }
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1; // 1-12
+      const start = `${year}-${String(month).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const end = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+      return await this.despesaRepository
+        .createQueryBuilder('d')
+        .where('d.data BETWEEN :start AND :end', { start, end })
+        .getMany();
+    }
+
     return await this.despesaRepository.find();
   }
 

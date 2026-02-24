@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   postgres:
     image: postgres:16
@@ -17,31 +18,28 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: controle_financeiro_api
-    restart: unless-stopped
-    ports:
-      - "${API_PORT:-3000}:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      DB_HOST: postgres
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASS: ${DB_PASS:-postgres}
-      DB_NAME: ${DB_NAME:-controle_financeiro}
-      DB_SCHEMA: ${DB_SCHEMA:-controle_financeiro}
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: controle_financeiro_api
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${API_PORT:-3000}:3000"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     NODE_ENV: ${NODE_ENV:-production}
+  #     DB_HOST: postgres
+  #     DB_PORT: ${DB_PORT:-5432}
+  #     DB_USER: ${DB_USER:-postgres}
+  #     DB_PASS: ${DB_PASS:-postgres}
+  #     DB_NAME: ${DB_NAME:-controle_financeiro}
+  #     DB_SCHEMA: ${DB_SCHEMA:-controle_financeiro}
+  #   networks:
+  #     - app-network
 
 volumes:
   postgres_data:
+    driver: local
