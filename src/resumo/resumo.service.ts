@@ -22,8 +22,8 @@ export class ResumoService {
     const receitas = await this.receitaService.findAll(queryParams);
 
     // Calcula os campos do resumo a partir das despesas
-    const totalPagar = toDecimal(despesas.filter((d) => !d.contaPaga).reduce((sum, d) => sum + d.valor, 0));
-    const totalPaga =  toDecimal(despesas.filter((d) => d.contaPaga).reduce((sum, d) => sum + d.valor, 0));
+    const totalPagar = toDecimal(despesas.filter((d) => !d.contaPaga).reduce((sum, d) => sum + toDecimal(d.valor), 0));
+    const totalPaga =  toDecimal(despesas.filter((d) => d.contaPaga).reduce((sum, d) => sum + toDecimal(d.valor), 0));
 
     // Soma o valor total das receitas
     const totalReceitas = toDecimal(receitas.reduce((sum, r) => sum + toDecimal(r.valor), 0));
