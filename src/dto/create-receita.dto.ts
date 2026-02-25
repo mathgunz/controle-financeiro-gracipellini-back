@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+
+export enum Repeticao {
+  DIARIAMENTE = 'DIARIAMENTE',
+  SEMANALMENTE = 'SEMANALMENTE',
+  MENSALMENTE = 'MENSALMENTE',
+  ANUALMENTE = 'ANUALMENTE',
+}
+
 export class CreateReceitaDto {
   @ApiProperty({
     description: 'Nome da receita',
@@ -20,25 +28,21 @@ export class CreateReceitaDto {
     type: String,
     format: 'date'
   })
-  data: Date;
-
-  @ApiProperty({
-    description: 'Categoria da receita',
-    enum: ['CASA', 'PESSOAL'],
-    example: 'PESSOAL'
-  })
-  categoria: 'CASA' | 'PESSOAL';
-
-  @ApiProperty({
-    description: 'Titular da receita',
-    example: 'João Silva'
-  })
-  titular: string;
+  dataRecebimento: Date;
 
   @ApiProperty({
     description: 'Quantidade de vezes no mês',
     example: 1,
     type: Number
   })
-  quantidadeMes: number;
+  quantidade: number;
+
+
+  @ApiProperty({
+    description: 'Frequência de repetição',
+    enum: Repeticao,
+    example: Repeticao.MENSALMENTE
+  })
+  repeticao: Repeticao;
 }
+
