@@ -1,11 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Pessoa } from './pessoa.entity';
-
-export enum TipoDespesa {
-  RECEITA = 'RECEITA',
-  DESPESA = 'DESPESA',
-  APLICACAO = 'APLICACAO',
-}
+import { Usuario } from './usuario.entity';
 
 export enum TipoPagamento {
   FIXA = 'FIXA',
@@ -13,18 +7,28 @@ export enum TipoPagamento {
   CARTAO_CREDITO = 'CARTAO_CREDITO',
 }
 
+export enum Repeticao {
+  DIARIAMENTE = 'DIARIAMENTE',
+  SEMANALMENTE = 'SEMANALMENTE',
+  MENSALMENTE = 'MENSALMENTE',
+  ANUALMENTE = 'ANUALMENTE',
+}
+
 export enum Categoria {
-  CASA = 'CASA',
-  PESSOAL = 'PESSOAL',
+  ALIMENTACAO = 'ALIMENTACAO',
+  EDUCACAO = 'EDUCACAO',
+  LAZER = 'LAZER',
+  MORADIA = 'MORADIA',
+  SAÚDE = 'SAÚDE',
+  TRANSPORTE = 'TRANSPORTE',
+  VESTUARIO = 'VESTUARIO',
+  OUTROS = 'OUTROS',
 }
 
 @Entity({ name: 'despesa', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Despesa {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'enum', enum: TipoDespesa })
-  tipo: TipoDespesa;
 
   @Column()
   nome: string;
@@ -33,7 +37,7 @@ export class Despesa {
   valor: number;
 
   @Column({ type: 'date' })
-  data: Date;
+  dataPagamento: Date;
 
   @Column({ type: 'enum', enum: TipoPagamento })
   tipoPagamento: TipoPagamento;
@@ -42,17 +46,17 @@ export class Despesa {
   categoria: Categoria;
 
   @Column()
-  titular: string;
+  hasContaPaga: boolean;
 
   @Column()
-  contaPaga: boolean;
+  quantidade: number;
 
-  @Column()
-  quantidadeMes: number;
+  @Column({ type: 'enum', enum: Repeticao })
+  repeticao: Repeticao;
 
-  @ManyToOne(() => Pessoa)
-  pessoa: Pessoa;
+  @ManyToOne(() => Usuario)
+  pessoa: Usuario;
 
-  @Column()
-  dataPagamento: string;
+  @Column({ type: 'date' })
+  dataCriacao: Date;
 }

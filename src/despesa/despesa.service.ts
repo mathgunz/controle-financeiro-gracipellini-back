@@ -14,6 +14,7 @@ export class DespesaService {
 
   async create(createDespesaDto: CreateDespesaDto): Promise<Despesa> {
     const despesa = this.despesaRepository.create(createDespesaDto);
+    despesa.dataCriacao = new Date();
     return await this.despesaRepository.save(despesa);
   }
 

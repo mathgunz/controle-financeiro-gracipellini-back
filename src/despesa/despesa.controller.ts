@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { DespesaService } from './despesa.service';
-import { CreateDespesaDto, TipoDespesa } from '../dto/create-despesa.dto';
+import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa } from 'src/entities/despesa.entity';
 

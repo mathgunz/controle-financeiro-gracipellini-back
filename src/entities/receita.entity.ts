@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Pessoa } from './pessoa.entity';
+import { Usuario } from './usuario.entity';
 
 @Entity({ name: 'receita', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Receita {
@@ -28,6 +28,6 @@ export class Receita {
   @Column()
   quantidadeMes: number;
 
-  @ManyToOne(() => Pessoa)
-  pessoa: Pessoa;
+  @ManyToOne(() => Usuario)
+  pessoa: Usuario;
 }
