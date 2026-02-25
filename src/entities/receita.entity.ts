@@ -19,18 +19,11 @@ export class Receita {
   @Column('decimal')
   valor: number;
 
-
   @Column({ type: 'date' })
   dataRecebimento: Date; // ou Date
 
-  @Column()
-  categoria: 'CASA' | 'PESSOAL';
-
-  @Column()
-  titular: string;
-
   @Column({ default: false })
-  recebida: boolean;
+  hasRecebida: boolean;
 
   @Column()
   quantidade: number;

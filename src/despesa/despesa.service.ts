@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa, Repeticao } from 'src/entities/despesa.entity';
+import { calcularRepeticoes } from 'src/utils/repeticoes.utils';
 
 @Injectable()
 export class DespesaService {
@@ -21,7 +22,7 @@ export class DespesaService {
       return despesaSalva;
     } else if (despesa.quantidade > 1) {
       
-      const repeticoes: Date[] = this.calcularRepeticoes(despesa.dataPagamento, despesa.repeticao, despesa.quantidade);
+      const repeticoes: Date[] = calcularRepeticoes(despesa.dataPagamento, despesa.repeticao, despesa.quantidade);
       const despesasCriadas: Despesa[] = [];
       
       let qtd = 1;
@@ -39,42 +40,6 @@ export class DespesaService {
 
     return await this.despesaRepository.save(despesa);
   }
-
-  calcularRepeticoes(dataPagamento: Date, repeticao: Repeticao, quantidade: number) {
-    const datasPagamentos: Date[] = [];
-
-    switch (repeticao) {
-      case Repeticao.DIARIAMENTE:
-        for (let i = 0; i < quantidade; i++) {
-          const novaData = new Date(dataPagamento);
-          novaData.setDate(novaData.getDate() + i);
-          datasPagamentos.push(novaData);
-        }
-        break;
-      case Repeticao.MENSALMENTE:
-        for (let i = 0; i < quantidade; i++) {
-          const novaData = new Date(dataPagamento);
-          novaData.setMonth(novaData.getMonth() + i);
-          datasPagamentos.push(novaData);
-        }
-        break;
-      case Repeticao.ANUALMENTE:
-        if (quantidade > 12) {
-          quantidade = 12; // Limita a quantidade para 12 anos
-        }
-        for (let i = 0; i < quantidade; i++) {
-          const novaData = new Date(dataPagamento);
-          novaData.setFullYear(novaData.getFullYear() + i);
-          datasPagamentos.push(novaData);
-        }
-        break;
-      default:
-        throw new Error('Repetição inválida');
-    }
-
-    return datasPagamentos;
-  }
-
   async findAll(query?: { date?: string | Date }): Promise<Despesa[]> {
     if (query?.date) {
       let d: Date;

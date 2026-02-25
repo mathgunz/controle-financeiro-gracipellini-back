@@ -33,8 +33,8 @@ export class ResumoService {
     const saldoMesAtual = totalReceitas - totalDespesas;
 
     // Calcula receitas recebidas e a receber
-    const totalRecebida = toDecimal(receitas.filter((r) => r.recebida).reduce((sum, r) => sum + r.valor, 0));
-    const totalReceber = toDecimal(receitas.filter((r) => !r.recebida).reduce((sum, r) => sum + r.valor, 0));
+    const totalRecebida = toDecimal(receitas.filter((r) => r.hasRecebida).reduce((sum, r) => sum + toDecimal(r.valor), 0));
+    const totalReceber = toDecimal(receitas.filter((r) => !r.hasRecebida).reduce((sum, r) => sum + toDecimal(r.valor), 0));
 
     const saldoAtual = totalRecebida - totalPaga;
 

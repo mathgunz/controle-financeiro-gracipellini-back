@@ -44,5 +44,12 @@ export class CreateReceitaDto {
     example: Repeticao.MENSALMENTE
   })
   repeticao: Repeticao;
+
+  @ApiProperty({
+    description: 'Indica se a conta foi paga',
+    example: false,
+    type: Boolean
+  })
+  hasRecebida: boolean;
 }
 

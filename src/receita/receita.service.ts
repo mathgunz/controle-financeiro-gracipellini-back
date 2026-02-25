@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
 import { Receita } from 'src/entities/receita.entity';
+import { calcularRepeticoes } from 'src/utils/repeticoes.utils';
 
 @Injectable()
 export class ReceitaService {
@@ -13,8 +14,29 @@ export class ReceitaService {
   ) {}
 
   async create(createReceitaDto: CreateReceitaDto): Promise<Receita> {
-    const nova = this.receitaRepository.create(createReceitaDto);
-    return await this.receitaRepository.save(nova);
+    const receita = this.receitaRepository.create(createReceitaDto);
+    receita.dataCriacao = new Date();
+
+    if ((receita.quantidade == 0 || receita.quantidade == 1)) {
+      const receitaSalva = await this.receitaRepository.save(receita);
+      return receitaSalva;
+    } else if (receita.quantidade > 1) {
+      
+      const repeticoes: Date[] = calcularRepeticoes(receita.dataRecebimento, receita.repeticao, receita.quantidade);
+      const receitasCriadas: Receita[] = [];
+      
+      for (const data of repeticoes) {
+        const receita = this.receitaRepository.create(createReceitaDto);
+        receita.dataRecebimento = data;
+        receita.dataCriacao = new Date();
+        receitasCriadas.push(receita);
+      }
+
+      const receitasSalvas = await this.receitaRepository.save(receitasCriadas);
+      return receitasSalvas[0]; // Retorna a primeira receita criada, ou você pode escolher outra lógica
+    };
+
+    return await this.receitaRepository.save(receita);
   }
 
   async findAll(query?: { date?: string | Date }): Promise<Receita[]> {
@@ -36,7 +58,7 @@ export class ReceitaService {
       
       return await this.receitaRepository
         .createQueryBuilder('d')
-        .where('d.data BETWEEN :start AND :end', { start, end })
+        .where('d.dataRecebimento BETWEEN :start AND :end', { start, end })
         .getMany();
     }
 
