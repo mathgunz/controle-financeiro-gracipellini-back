@@ -59,4 +59,7 @@ export class Despesa {
 
   @Column({ type: 'date' })
   dataCriacao: Date;
+
+  @Column({ nullable: true })
+  numeroParcela: number;
 }

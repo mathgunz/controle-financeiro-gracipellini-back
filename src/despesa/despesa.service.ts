@@ -3,25 +3,82 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
-import { Despesa } from 'src/entities/despesa.entity';
+import { Despesa, Repeticao } from 'src/entities/despesa.entity';
 
 @Injectable()
 export class DespesaService {
   constructor(
     @InjectRepository(Despesa)
     private readonly despesaRepository: Repository<Despesa>,
-  ) {}
+  ) { }
 
   async create(createDespesaDto: CreateDespesaDto): Promise<Despesa> {
     const despesa = this.despesaRepository.create(createDespesaDto);
     despesa.dataCriacao = new Date();
+
+    if ((despesa.quantidade == 0 || despesa.quantidade == 1)) {
+      const despesaSalva = await this.despesaRepository.save(despesa);
+      return despesaSalva;
+    } else if (despesa.quantidade > 1) {
+      
+      const repeticoes: Date[] = this.calcularRepeticoes(despesa.dataPagamento, despesa.repeticao, despesa.quantidade);
+      const despesasCriadas: Despesa[] = [];
+      
+      let qtd = 1;
+      for (const data of repeticoes) {
+        const despesa = this.despesaRepository.create(createDespesaDto);
+        despesa.dataPagamento = data;
+        despesa.dataCriacao = new Date();
+        despesa.numeroParcela = qtd++;
+        despesasCriadas.push(despesa);
+      }
+
+      const despesasSalvas = await this.despesaRepository.save(despesasCriadas);
+      return despesasSalvas[0]; // Retorna a primeira despesa criada, ou você pode escolher outra lógica
+    };
+
     return await this.despesaRepository.save(despesa);
+  }
+
+  calcularRepeticoes(dataPagamento: Date, repeticao: Repeticao, quantidade: number) {
+    const datasPagamentos: Date[] = [];
+
+    switch (repeticao) {
+      case Repeticao.DIARIAMENTE:
+        for (let i = 0; i < quantidade; i++) {
+          const novaData = new Date(dataPagamento);
+          novaData.setDate(novaData.getDate() + i);
+          datasPagamentos.push(novaData);
+        }
+        break;
+      case Repeticao.MENSALMENTE:
+        for (let i = 0; i < quantidade; i++) {
+          const novaData = new Date(dataPagamento);
+          novaData.setMonth(novaData.getMonth() + i);
+          datasPagamentos.push(novaData);
+        }
+        break;
+      case Repeticao.ANUALMENTE:
+        if (quantidade > 12) {
+          quantidade = 12; // Limita a quantidade para 12 anos
+        }
+        for (let i = 0; i < quantidade; i++) {
+          const novaData = new Date(dataPagamento);
+          novaData.setFullYear(novaData.getFullYear() + i);
+          datasPagamentos.push(novaData);
+        }
+        break;
+      default:
+        throw new Error('Repetição inválida');
+    }
+
+    return datasPagamentos;
   }
 
   async findAll(query?: { date?: string | Date }): Promise<Despesa[]> {
     if (query?.date) {
-          let d: Date;
-    
+      let d: Date;
+
       if (typeof query.date === 'string') {
         // Parse manual para garantir yyyy-mm-dd
         const [year, month, day] = query.date.split('-').map(Number);
@@ -37,7 +94,7 @@ export class DespesaService {
 
       return await this.despesaRepository
         .createQueryBuilder('d')
-        .where('d.data BETWEEN :start AND :end', { start, end })
+        .where('d.dataPagamento BETWEEN :start AND :end', { start, end })
         .getMany();
     }
 
