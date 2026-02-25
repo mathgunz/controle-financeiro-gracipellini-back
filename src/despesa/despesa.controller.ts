@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { DespesaService } from './despesa.service';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
@@ -9,8 +9,8 @@ export class DespesaController {
   constructor(private readonly despesaService: DespesaService) {}
 
   @Get()
-  async findAll(): Promise<Despesa[]> {
-    return await this.despesaService.findAll();
+  async findAll(@Query('dataPagamento') dataPagamento?: string): Promise<Despesa[]> {
+    return await this.despesaService.findAll(dataPagamento ? { dataPagamento } : undefined);
   }
 
   @Get(':id')

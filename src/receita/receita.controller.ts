@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { ReceitaService } from './receita.service';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
@@ -8,8 +8,8 @@ export class ReceitaController {
   constructor(private readonly receitaService: ReceitaService) {}
 
   @Get()
-  findAll() {
-    return this.receitaService.findAll();
+  findAll(@Query('dataRecebimento') dataRecebimento?: string) {
+    return this.receitaService.findAll(dataRecebimento ? { dataRecebimento } : undefined);
   }
 
   @Get(':id')

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
@@ -39,16 +39,29 @@ export class ReceitaService {
     return await this.receitaRepository.save(receita);
   }
 
-  async findAll(query?: { date?: string | Date }): Promise<Receita[]> {
-      if (query?.date) {
+  async findAll(query?: { dataRecebimento?: string | Date; date?: string | Date }): Promise<Receita[]> {
+      const dataRecebimento = query?.dataRecebimento ?? query?.date;
+
+      if (dataRecebimento) {
         let d: Date;
       
-        if (typeof query.date === 'string') {
-          // Parse manual para garantir yyyy-mm-dd
-          const [year, month, day] = query.date.split('-').map(Number);
+        if (typeof dataRecebimento === 'string') {
+          const match = dataRecebimento.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (!match) {
+            throw new BadRequestException('dataRecebimento deve estar no formato yyyy-mm-dd');
+          }
+
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const day = Number(match[3]);
+
+          if (month < 1 || month > 12 || day < 1 || day > 31) {
+            throw new BadRequestException('dataRecebimento inválida');
+          }
+
           d = new Date(year, month - 1, day);
         } else {
-          d = new Date(query.date);
+          d = new Date(dataRecebimento);
         }
       const year = d.getFullYear();
       const month = d.getMonth() + 1; // 1-12

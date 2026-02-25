@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
@@ -40,16 +40,29 @@ export class DespesaService {
 
     return await this.despesaRepository.save(despesa);
   }
-  async findAll(query?: { date?: string | Date }): Promise<Despesa[]> {
-    if (query?.date) {
+  async findAll(query?: { dataPagamento?: string | Date; date?: string | Date }): Promise<Despesa[]> {
+    const dataPagamento = query?.dataPagamento ?? query?.date;
+
+    if (dataPagamento) {
       let d: Date;
 
-      if (typeof query.date === 'string') {
-        // Parse manual para garantir yyyy-mm-dd
-        const [year, month, day] = query.date.split('-').map(Number);
+      if (typeof dataPagamento === 'string') {
+        const match = dataPagamento.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) {
+          throw new BadRequestException('dataPagamento deve estar no formato yyyy-mm-dd');
+        }
+
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+
+        if (month < 1 || month > 12 || day < 1 || day > 31) {
+          throw new BadRequestException('dataPagamento inválida');
+        }
+
         d = new Date(year, month - 1, day);
       } else {
-        d = new Date(query.date);
+        d = new Date(dataPagamento);
       }
       const year = d.getFullYear();
       const month = d.getMonth() + 1; // 1-12
