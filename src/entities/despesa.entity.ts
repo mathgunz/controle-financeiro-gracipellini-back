@@ -62,4 +62,7 @@ export class Despesa {
 
   @Column({ nullable: true })
   numeroParcela: number;
+
+  @Column({ nullable: true })
+  repeticaoUUID: string;
 }

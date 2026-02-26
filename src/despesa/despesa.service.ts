@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa, Repeticao } from 'src/entities/despesa.entity';
 import { calcularRepeticoes } from 'src/utils/repeticoes.utils';
+import { randomUUID } from 'crypto';
+
 
 @Injectable()
 export class DespesaService {
@@ -13,21 +15,28 @@ export class DespesaService {
     private readonly despesaRepository: Repository<Despesa>,
   ) { }
 
-  async create(createDespesaDto: CreateDespesaDto): Promise<Despesa> {
+  async create(createDespesaDto: CreateDespesaDto): Promise<Despesa[]> {
+
+    const repeticaoUUID = randomUUID().toString();
+
     const despesa = this.despesaRepository.create(createDespesaDto);
+
     despesa.dataCriacao = new Date();
 
     if ((despesa.quantidade == 0 || despesa.quantidade == 1)) {
+      // despesa.repeticaoUUID = repeticaoUUID;
+      despesa.numeroParcela = 1;
       const despesaSalva = await this.despesaRepository.save(despesa);
-      return despesaSalva;
+      return [despesaSalva];
     } else if (despesa.quantidade > 1) {
-      
+
       const repeticoes: Date[] = calcularRepeticoes(despesa.dataPagamento, despesa.repeticao, despesa.quantidade);
       const despesasCriadas: Despesa[] = [];
-      
+
       let qtd = 1;
       for (const data of repeticoes) {
         const despesa = this.despesaRepository.create(createDespesaDto);
+        despesa.repeticaoUUID = repeticaoUUID;
         despesa.dataPagamento = data;
         despesa.dataCriacao = new Date();
         despesa.numeroParcela = qtd++;
@@ -35,15 +44,21 @@ export class DespesaService {
       }
 
       const despesasSalvas = await this.despesaRepository.save(despesasCriadas);
-      return despesasSalvas[0]; // Retorna a primeira despesa criada, ou você pode escolher outra lógica
+      return despesasSalvas; // Retorna a primeira despesa criada, ou você pode escolher outra lógica
     };
 
-    return await this.despesaRepository.save(despesa);
+    return [await this.despesaRepository.save(despesa)];
   }
   async findAll(query?: { dataPagamento?: string | Date; date?: string | Date }): Promise<Despesa[]> {
-    const dataPagamento = query?.dataPagamento ?? query?.date;
+    const dataPagamentoRaw = query?.dataPagamento ?? query?.date;
+    const dataPagamento =
+      typeof dataPagamentoRaw === 'string' ? dataPagamentoRaw.trim() : dataPagamentoRaw;
 
-    if (dataPagamento) {
+    if (
+      dataPagamento &&
+      dataPagamento !== 'null' &&
+      dataPagamento !== 'undefined'
+    ) {
       let d: Date;
 
       if (typeof dataPagamento === 'string') {
@@ -85,13 +100,68 @@ export class DespesaService {
     return despesa;
   }
 
-  async update(id: number, updateDespesaDto: UpdateDespesaDto): Promise<Despesa> {
+  async update(id: number, updateDespesaDto: UpdateDespesaDto): Promise<Despesa[]> {
+
+    const tipoEdicao = updateDespesaDto.tipoEdicao;
+
     const despesa = await this.despesaRepository.preload({
       id,
-      ...updateDespesaDto,
+      categoria: updateDespesaDto.categoria,
+      nome: updateDespesaDto.nome,
+      tipoPagamento: updateDespesaDto.tipoPagamento,
+      hasContaPaga: updateDespesaDto.hasContaPaga,
+      valor: updateDespesaDto.valor,
+      dataPagamento: updateDespesaDto.dataPagamento,
     });
     if (!despesa) throw new NotFoundException('Despesa não encontrada');
-    return await this.despesaRepository.save(despesa);
+
+
+    switch (tipoEdicao) {
+      case 'CONTA_SELECIONADA':
+        return [await this.despesaRepository.save(despesa)];
+
+      case 'PROXIMAS_CONTAS':
+
+        const allDespesas = await this.despesaRepository.findBy({
+          repeticaoUUID: despesa.repeticaoUUID,
+          dataPagamento: MoreThanOrEqual(despesa.dataPagamento),
+        });
+
+        if (allDespesas.length === 0) {
+          throw new NotFoundException('Nenhuma despesa futura encontrada para esta conta');
+        }
+
+        for (const d of allDespesas) {
+          d.categoria = despesa.categoria;
+          d.nome = despesa.nome;
+          d.tipoPagamento = despesa.tipoPagamento;
+          d.hasContaPaga = despesa.hasContaPaga;
+          d.valor = despesa.valor;
+        }
+
+        return await this.despesaRepository.save(allDespesas);
+
+      case 'TODAS_CONTAS':
+
+        const despesasParaAtualizar = await this.despesaRepository.findBy({ repeticaoUUID: despesa.repeticaoUUID });
+
+        if (despesasParaAtualizar.length === 0) {
+          throw new NotFoundException('Nenhuma despesa encontrada para esta conta');
+        }
+
+        for (const d of despesasParaAtualizar) {
+          d.categoria = despesa.categoria;
+          d.nome = despesa.nome;
+          d.tipoPagamento = despesa.tipoPagamento;
+          d.hasContaPaga = despesa.hasContaPaga;
+          d.valor = despesa.valor;
+        }
+
+        return await this.despesaRepository.save(despesasParaAtualizar);
+
+      default:
+        throw new BadRequestException('Tipo de edição inválida');
+    }
   }
 
   async remove(id: number): Promise<void> {
