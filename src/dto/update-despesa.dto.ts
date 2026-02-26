@@ -1,9 +1,13 @@
-import { PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateDespesaDto } from './create-despesa.dto';
 
 export class UpdateDespesaDto extends PartialType(CreateDespesaDto) {
 
-    tipoEdicao: TipoEdicao;    
+  @ApiProperty({
+    description: 'Tipo de edição',
+    example: 'CONTA_SELECIONADA'
+  })
+  tipoEdicao: TipoEdicao;
 
 }
 

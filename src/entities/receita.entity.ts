@@ -36,4 +36,7 @@ export class Receita {
 
   @Column({ type: 'date' })
   dataCriacao: Date; // ou Date
+
+  @Column({ nullable: true })
+  repeticaoUUID: string;
 }
