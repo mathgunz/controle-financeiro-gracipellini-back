@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'usuario', schema: process.env.DB_SCHEMA || 'controle_financeiro' })
 export class Usuario {
@@ -11,12 +11,15 @@ export class Usuario {
   @Column()
   sobrenome: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ select: false })
   senha: string;
 
   @Column({ default: true })
   ativo: boolean;
+
+  @Column({ type: 'text', nullable: true, select: false })
+  refreshTokenHash?: string | null;
 }

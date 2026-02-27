@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { DespesaService } from './despesa.service';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa } from 'src/entities/despesa.entity';
 
 @Controller('despesa')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class DespesaController {
   constructor(private readonly despesaService: DespesaService) {}
 

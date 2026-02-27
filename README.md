@@ -43,6 +43,90 @@ npm run start:dev
 - A API ficará disponível em `http://localhost:3000`.
 - A documentação Swagger estará em `http://localhost:3000/swagger`.
 
+### Fluxo de autenticação (JWT)
+
+Com a autenticação habilitada, quase todas as rotas exigem `Authorization: Bearer <accessToken>`.
+As rotas públicas são:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `GET /` (health simples)
+
+Fluxo recomendado:
+
+```mermaid
+flowchart TD
+    A[Criar conta\nPOST /auth/register] --> B[Login\nPOST /auth/login]
+    B --> C[Recebe accessToken + refreshToken]
+    C --> D[Chama API protegida\nAuthorization: Bearer accessToken]
+    D --> E{Access token expirou?}
+    E -- Não --> D
+    E -- Sim --> F[Refresh\nPOST /auth/refresh com refreshToken]
+    F --> G[Novo accessToken + novo refreshToken]
+    G --> D
+    D --> H[Logout\nPOST /auth/logout]
+```
+
+Exemplo de uso:
+
+1. Registrar usuário
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome":"João",
+    "sobrenome":"Silva",
+    "email":"joao.silva@example.com",
+    "senha":"senha123"
+  }'
+```
+
+2. Fazer login
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"joao.silva@example.com",
+    "senha":"senha123"
+  }'
+```
+
+Resposta esperada (resumo):
+```json
+{
+  "accessToken": "....",
+  "refreshToken": "....",
+  "usuario": {
+    "id": 1,
+    "nome": "João",
+    "sobrenome": "Silva",
+    "email": "joao.silva@example.com"
+  }
+}
+```
+
+3. Consumir rota protegida
+```bash
+curl http://localhost:3000/despesa \
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN"
+```
+
+4. Renovar token quando expirar
+```bash
+curl -X POST http://localhost:3000/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken":"SEU_REFRESH_TOKEN"
+  }'
+```
+
+5. Logout (invalida refresh token salvo)
+```bash
+curl -X POST http://localhost:3000/auth/logout \
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN"
+```
+
 ### Scripts úteis
 
 - `npm run start` – execução sem watch.

@@ -1,20 +1,24 @@
 import { Module, OnModuleInit } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsuarioModule } from './usuario/usuario.module';
 import { ReceitaModule } from './receita/receita.module';
 import { ResumoModule } from './resumo/resumo.module';
 import { DespesaModule } from './despesa/despesa.module';
+import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Usuario } from './entities/usuario.entity';
 import { Receita } from './entities/receita.entity';
 import { Despesa } from './entities/despesa.entity';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     UsuarioModule,
+    AuthModule,
     ReceitaModule,
     ResumoModule,
     DespesaModule,
@@ -32,7 +36,13 @@ import { Despesa } from './entities/despesa.entity';
       ssl: false, // SSL disabled for local development
     }),],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements OnModuleInit {
   constructor(private dataSource: DataSource) { }
