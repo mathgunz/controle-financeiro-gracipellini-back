@@ -10,16 +10,16 @@ export class ResumoService {
     private readonly receitaService: ReceitaService,
   ) {}
 
-  async findAll(queryParams?: { date?: string | Date }): Promise<Resumo[]> {
+  async findAll(queryParams?: { date?: string | Date; }, usuarioId?: number | undefined): Promise<Resumo[]> {
 
     const toDecimal = (n: number | string) => {
       const num = typeof n === 'string' ? parseFloat(n) : n;
       return Number(num.toFixed(2));
     };
     // Busca todas as despesas usando o service (podendo filtrar por data)
-    const despesas = await this.despesaService.findAll(queryParams);
+    const despesas = await this.despesaService.findAll(queryParams, usuarioId);
     // Busca todas as receitas usando o service (podendo filtrar por data)
-    const receitas = await this.receitaService.findAll(queryParams);
+    const receitas = await this.receitaService.findAll(queryParams, usuarioId);
 
     // Calcula os campos do resumo a partir das despesas
     const totalPagar = toDecimal(despesas.filter((d) => !d.hasContaPaga).reduce((sum, d) => sum + toDecimal(d.valor), 0));

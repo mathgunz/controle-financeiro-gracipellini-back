@@ -6,6 +6,7 @@ import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa, Repeticao } from 'src/entities/despesa.entity';
 import { calcularRepeticoes } from 'src/utils/repeticoes.utils';
 import { randomUUID } from 'crypto';
+import { UsuarioService } from 'src/usuario/usuario.service';
 
 
 @Injectable()
@@ -13,13 +14,17 @@ export class DespesaService {
   constructor(
     @InjectRepository(Despesa)
     private readonly despesaRepository: Repository<Despesa>,
+    private readonly usuarioService: UsuarioService,
   ) { }
 
-  async create(createDespesaDto: CreateDespesaDto): Promise<Despesa[]> {
+  async create(createDespesaDto: CreateDespesaDto, usuarioId: number): Promise<Despesa[]> {
 
     const repeticaoUUID = randomUUID().toString();
 
     const despesa = this.despesaRepository.create(createDespesaDto);
+
+    const usuario = await this.usuarioService.findOne(usuarioId);
+    despesa.pessoa = usuario;
 
     despesa.dataCriacao = new Date();
 
@@ -40,6 +45,7 @@ export class DespesaService {
         despesa.dataPagamento = data;
         despesa.dataCriacao = new Date();
         despesa.numeroParcela = qtd++;
+        despesa.pessoa = usuario;
         despesasCriadas.push(despesa);
       }
 
@@ -49,7 +55,7 @@ export class DespesaService {
 
     return [await this.despesaRepository.save(despesa)];
   }
-  async findAll(query?: { dataPagamento?: string | Date; date?: string | Date }): Promise<Despesa[]> {
+  async findAll(query?: { dataPagamento?: string | Date; date?: string | Date; }, usuarioId?: number | undefined): Promise<Despesa[]> {
     const dataPagamentoRaw = query?.dataPagamento ?? query?.date;
     const dataPagamento =
       typeof dataPagamentoRaw === 'string' ? dataPagamentoRaw.trim() : dataPagamentoRaw;
@@ -88,19 +94,20 @@ export class DespesaService {
       return await this.despesaRepository
         .createQueryBuilder('d')
         .where('d.dataPagamento BETWEEN :start AND :end', { start, end })
+        .andWhere('d.pessoaId = :usuarioId', { usuarioId })
         .getMany();
     }
 
     return await this.despesaRepository.find();
   }
 
-  async findOne(id: number): Promise<Despesa> {
-    const despesa = await this.despesaRepository.findOneBy({ id });
+  async findOne(id: number, usuarioId: number | undefined): Promise<Despesa> {
+    const despesa = await this.despesaRepository.findOneBy({ id, pessoa: { id: usuarioId } });
     if (!despesa) throw new NotFoundException('Despesa não encontrada');
     return despesa;
   }
 
-  async update(id: number, updateDespesaDto: UpdateDespesaDto): Promise<Despesa[]> {
+  async update(id: number, updateDespesaDto: UpdateDespesaDto, usuarioId: number | undefined): Promise<Despesa[]> {
 
     const tipoEdicao = updateDespesaDto.tipoEdicao;
 
@@ -125,6 +132,7 @@ export class DespesaService {
         const allDespesas = await this.despesaRepository.findBy({
           repeticaoUUID: despesa.repeticaoUUID,
           dataPagamento: MoreThanOrEqual(despesa.dataPagamento),
+          pessoa: { id: usuarioId },
         });
 
         if (allDespesas.length === 0) {
@@ -143,7 +151,7 @@ export class DespesaService {
 
       case 'TODAS_CONTAS':
 
-        const despesasParaAtualizar = await this.despesaRepository.findBy({ repeticaoUUID: despesa.repeticaoUUID });
+        const despesasParaAtualizar = await this.despesaRepository.findBy({ repeticaoUUID: despesa.repeticaoUUID, pessoa: { id: usuarioId } });
 
         if (despesasParaAtualizar.length === 0) {
           throw new NotFoundException('Nenhuma despesa encontrada para esta conta');
@@ -164,8 +172,8 @@ export class DespesaService {
     }
   }
 
-  async remove(id: number): Promise<void> {
-    const despesa = await this.despesaRepository.findOneBy({ id });
+  async remove(id: number, usuarioId: number | undefined): Promise<void> {
+    const despesa = await this.despesaRepository.findOneBy({ id, pessoa: { id: usuarioId } });
     if (!despesa) throw new NotFoundException('Despesa não encontrada');
     await this.despesaRepository.remove(despesa);
   }

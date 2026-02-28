@@ -7,10 +7,11 @@ import { Despesa } from 'src/entities/despesa.entity';
 import { ReceitaService } from 'src/receita/receita.service';
 import { Usuario } from 'src/entities/usuario.entity';
 import { Receita } from 'src/entities/receita.entity';
+import { UsuarioService } from 'src/usuario/usuario.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Despesa, Receita, Usuario])],
   controllers: [ResumoController],
-  providers: [ResumoService, DespesaService, ReceitaService],
+  providers: [ResumoService, DespesaService, ReceitaService, UsuarioService],
 })
 export class ResumoModule {}

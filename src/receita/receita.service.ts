@@ -6,20 +6,25 @@ import { UpdateReceitaDto } from '../dto/update-receita.dto';
 import { Receita } from 'src/entities/receita.entity';
 import { calcularRepeticoes } from 'src/utils/repeticoes.utils';
 import { randomUUID } from 'crypto';
+import { UsuarioService } from 'src/usuario/usuario.service';
 
 @Injectable()
 export class ReceitaService {
   constructor(
     @InjectRepository(Receita)
     private receitaRepository: Repository<Receita>,
+    private readonly usuarioService: UsuarioService,
   ) { }
 
-  async create(createReceitaDto: CreateReceitaDto): Promise<Receita[]> {
+  async create(createReceitaDto: CreateReceitaDto, usuarioId: number): Promise<Receita[]> {
 
     const repeticaoUUID = randomUUID().toString();
 
     const receita = this.receitaRepository.create(createReceitaDto);
+    const pessoa = await this.usuarioService.findOne(usuarioId);
+
     receita.dataCriacao = new Date();
+    receita.pessoa = pessoa;
 
     if ((receita.quantidade == 0 || receita.quantidade == 1)) {
       const receitaSalva = await this.receitaRepository.save(receita);
@@ -34,6 +39,7 @@ export class ReceitaService {
         receita.dataRecebimento = data;
         receita.dataCriacao = new Date();
         receita.repeticaoUUID = repeticaoUUID;
+        receita.pessoa = pessoa;
         receitasCriadas.push(receita);
       }
 
@@ -44,7 +50,7 @@ export class ReceitaService {
     return [await this.receitaRepository.save(receita)];
   }
 
-  async findAll(query?: { dataRecebimento?: string | Date; date?: string | Date }): Promise<Receita[]> {
+  async findAll(query?: { dataRecebimento?: string | Date; date?: string | Date }, usuarioId?: number | undefined): Promise<Receita[]> {
     const dataRecebimento = query?.dataRecebimento ?? query?.date;
 
     if (dataRecebimento) {
@@ -77,18 +83,19 @@ export class ReceitaService {
       return await this.receitaRepository
         .createQueryBuilder('d')
         .where('d.dataRecebimento BETWEEN :start AND :end', { start, end })
+        .andWhere('d.pessoaId = :usuarioId', { usuarioId })
         .getMany();
     }
 
     return await this.receitaRepository.find();
   }
 
-  async findOne(id: number): Promise<Receita | { message: string }> {
-    const receita = await this.receitaRepository.findOne({ where: { id } });
+  async findOne(id: number, usuarioId: number | undefined): Promise<Receita | { message: string }> {
+    const receita = await this.receitaRepository.findOneBy({ id, pessoa: { id: usuarioId } });
     return receita || { message: 'Receita não encontrada' };
   }
 
-  async update(id: number, updateReceitaDto: UpdateReceitaDto): Promise<Receita[]> {
+  async update(id: number, updateReceitaDto: UpdateReceitaDto, usuarioId: number | undefined): Promise<Receita[]> {
 
     const tipoEdicao = updateReceitaDto.tipoEdicao;
 
@@ -112,6 +119,7 @@ export class ReceitaService {
         const allReceitas = await this.receitaRepository.findBy({
           repeticaoUUID: receita.repeticaoUUID,
           dataRecebimento: MoreThanOrEqual(receita.dataRecebimento),
+          pessoa: { id: usuarioId },
         });
 
         if (allReceitas.length === 0) {
@@ -128,7 +136,7 @@ export class ReceitaService {
 
       case 'TODAS_CONTAS':
 
-        const receitasParaAtualizar = await this.receitaRepository.findBy({ repeticaoUUID: receita.repeticaoUUID });
+        const receitasParaAtualizar = await this.receitaRepository.findBy({ repeticaoUUID: receita.repeticaoUUID, pessoa: { id: usuarioId } });
 
         if (receitasParaAtualizar.length === 0) {
           throw new NotFoundException('Nenhuma receita encontrada para esta conta');
@@ -147,8 +155,9 @@ export class ReceitaService {
     }
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const result = await this.receitaRepository.delete(id);
+  async remove(id: number, usuarioId: number | undefined): Promise<{ message: string }> {
+    
+    const result = await this.receitaRepository.delete({ id, pessoa: { id: usuarioId } });
     if (result.affected === 0) return { message: 'Receita não encontrada' };
     return { message: 'Receita removida com sucesso' };
   }
