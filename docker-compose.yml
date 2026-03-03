@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   postgres:
     image: postgres:16
@@ -13,33 +12,53 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-controle_financeiro}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
-  # api:
+  api:
+    image: ${API_IMAGE:-controle-financeiro:latest}
+    container_name: controle_financeiro_api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-controle_financeiro}
+      DB_SCHEMA: ${DB_SCHEMA:-controle_financeiro}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+    networks:
+      - app-network
+
+  # front:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
-  #   container_name: controle_financeiro_api
+  #   container_name: controle-financeiro-front
   #   restart: unless-stopped
   #   ports:
-  #     - "${API_PORT:-3000}:3000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   environment:
-  #     NODE_ENV: ${NODE_ENV:-production}
-  #     DB_HOST: postgres
-  #     DB_PORT: ${DB_PORT:-5432}
-  #     DB_USER: ${DB_USER:-postgres}
-  #     DB_PASS: ${DB_PASS:-postgres}
-  #     DB_NAME: ${DB_NAME:-controle_financeiro}
-  #     DB_SCHEMA: ${DB_SCHEMA:-controle_financeiro}
+  #     - "80:80"
   #   networks:
   #     - app-network
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  app-network:
+    driver: bridge

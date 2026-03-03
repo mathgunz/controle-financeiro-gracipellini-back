@@ -1,56 +1,33 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
 COPY . .
+RUN npm run build && npm prune --omit=dev
 
-# Build the application
-RUN npm run build
-
-# Stage 2: Runtime
-FROM node:20-alpine
+FROM node:20-bookworm-slim AS runtime
 
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends dumb-init \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm ci --only=production
-
-# Copy built application from builder stage
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# Change ownership to nodejs user
-RUN chown -R nodejs:nodejs /app
+RUN chown -R node:node /app
+USER node
 
-# Switch to non-root user
-USER nodejs
-
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:3000/', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["node", "dist/main"]
